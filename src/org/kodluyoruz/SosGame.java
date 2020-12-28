@@ -13,8 +13,7 @@ public class SosGame {
 	private int playerPoint;
 	private int computerPoint;
 	
-	private int[] indexOfLastInput = new int[2];
-	
+	private int[] indexOfLastInput = new int[2];	
 	private HashMap<Integer,Integer> emptyCoordinates = new HashMap<Integer,Integer>();
 	
 	private static final int playerFlag = 1;
@@ -23,10 +22,14 @@ public class SosGame {
 	private char computerChar;
 	private char playerChar;
 	
+	private int playFirst;
+	private int playSecond;
+	
 	Scanner sc = new Scanner(System.in);
 	Random rand = new Random();
 
-	
+
+	// Constructor
 	public SosGame(int boardSize) {
 		this.boardSize = boardSize + 2;
 		board = new char[this.boardSize][this.boardSize];
@@ -37,44 +40,29 @@ public class SosGame {
     	createBoard();
     	printBoard();
     	decideCharOfPlayers();
+    	whoWillPlayFirst();
+    	
 	}
 	
-	private void decideCharOfPlayers() {
-		if(rand.nextInt(10) % 2 == 0) {
-			computerChar = 'S';
-			playerChar = 'O';
-		}
-		else {
-			computerChar = 'O';
-			playerChar = 'S';
-		}
-	}
-
-
-	public void playGame() {
-		
-    	
-    	while(!isGameEnd) {
-    			
-    		playerMove();
+	public void playGame() {		
+		while(!isGameEnd) {		
+    		move(playFirst);
     		printBoard();
-    		while(isThereSOS(playerFlag) && !isGameEnd) {
+    		while(isThereSOS(playFirst) && !isGameEnd) {
     			printBoard();
     			printPoints();
-    			playerMove();
-    			printBoard();
-    			
+    			move(playFirst);
+    			printBoard();   			
     		}
     		if(!isGameEnd) {
-    			computerMove();
+    			move(playSecond);
     			printBoard();
     		}
-    		while(isThereSOS(computerFlag) && !isGameEnd) {
+    		while(isThereSOS(playSecond) && !isGameEnd) {
     			printBoard();
     			printPoints();
-    			computerMove();
-    			printBoard();
-    			
+    			move(playSecond);
+    			printBoard();  			
     		}
     	}
     	
@@ -86,6 +74,15 @@ public class SosGame {
     	else System.out.println("COMPUTER WINS");
 	}
 	
+	private void move(int who) {
+		if(who == playerFlag) {
+			playerMove();
+		}
+		if(who == computerFlag) {
+			computerMove();
+		}
+	}
+	
 	private void printPoints() {
 		System.out.println("PLAYER POINT = " + playerPoint);
 		System.out.println("COMPUTER POINT = " + computerPoint);
@@ -94,78 +91,79 @@ public class SosGame {
 	private boolean isThereSOS(int flag) {
 		int currX = indexOfLastInput[0];
 		int currY = indexOfLastInput[1];
+		boolean res = false;
 		
 		if(currX+2 <= boardSize-1 && ("" + board[currX][currY] + board[currX+1][currY] + board[currX+2][currY]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX, currY, currX+1, currY, currX+2, currY, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX-1 >= 0 && currX+1 <= boardSize-1 && ("" + board[currX-1][currY] + board[currX][currY] + board[currX+1][currY]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX-1, currY, currX, currY, currX+1, currY, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX-2 >= 0 && ("" + board[currX-2][currY] + board[currX-1][currY] + board[currX][currY]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX-2, currY, currX-1, currY, currX, currY, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currY+2 <= boardSize-1 && ("" + board[currX][currY] + board[currX][currY+1] + board[currX][currY+2]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX, currY, currX, currY+1, currX, currY+2, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currY-1 >= 0 && currY+1 <= boardSize-1 && ("" + board[currX][currY-1] + board[currX][currY] + board[currX][currY+1]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX, currY-1, currX, currY, currX, currY+1, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currY-2 >= 0 && ("" + board[currX][currY-2] + board[currX][currY-1] + board[currX][currY]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX, currY-2, currX, currY-1, currX, currY, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX+2 <= boardSize-1 && currY+2 <= boardSize-1 && ("" + board[currX][currY] + board[currX+1][currY+1] + board[currX+2][currY+2]).toUpperCase().equals("SOS")) {
 			this.makeLowerCaseAndUpdatePoints(currX, currY, currX+1, currY+1, currX+2, currY+2, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX+1 <= boardSize-1 && currY+1 <= boardSize-1 && currX-1 >= 0 && currY-1 >= 0 && 
 		  ("" + board[currX-1][currY-1] + board[currX][currY] + board[currX+1][currY+1]).toUpperCase().equals("SOS")) {
 			
 			this.makeLowerCaseAndUpdatePoints(currX-1, currY-1, currX, currY, currX+1, currY+1, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX-2 >=0 && currY-2 >= 0 && 
 		  ("" + board[currX-2][currY-2] + board[currX-1][currY-1] + board[currX][currY]).toUpperCase().equals("SOS")) {
 			
 			this.makeLowerCaseAndUpdatePoints(currX-2, currY-2, currX-1, currY-1, currX, currY, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX+2 <= boardSize-1 && currY-2 >= 0 && 
 		  ("" + board[currX][currY] + board[currX+1][currY-1] + board[currX+2][currY-2]).toUpperCase().equals("SOS")) {
 			
 			this.makeLowerCaseAndUpdatePoints(currX, currY, currX+1, currY-1, currX+2, currY-2, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX+1 <= boardSize-1 && currX-1 >= 0 && currY+1 <= boardSize-1 && currY-1 >= 0 &&
 		  ("" + board[currX-1][currY+1] + board[currX][currY] + board[currX+1][currY-1]).toUpperCase().equals("SOS")) {
 			
 			this.makeLowerCaseAndUpdatePoints(currX-1, currY+1, currX, currY, currX+1, currY-1, flag);
-			return true;
+			res = true;
 		}
 		
 		if(currX-2 >= 0 && currY+2 <= boardSize-1 && 
 		  ("" + board[currX-2][currY+2] + board[currX-1][currY+1] + board[currX][currY]).toUpperCase().equals("SOS")) {
 			
 			this.makeLowerCaseAndUpdatePoints(currX-2, currY+2, currX-1, currY+1, currX, currY, flag);
-			return true;
+			res = true;
 		}
 				
-		return false;
+		return res;
 	}
 	
 	private void makeLowerCaseAndUpdatePoints(int a, int b, int c, int d, int e, int f, int flag) {
@@ -211,7 +209,7 @@ public class SosGame {
     }
 	
 	private void playerMove() {
-    	System.out.println("Enter your move and coordinates");
+    	System.out.println("Enter your move (x y)");
 		int x = sc.nextInt();
 		int y = sc.nextInt();
 		//char c = sc.next().charAt(0);
@@ -234,7 +232,6 @@ public class SosGame {
     	
 		emptyCoordinates();
     	int randomNo = rand.nextInt(emptyCoordinates.size());
-    	System.out.println("RANDOM NO = " + randomNo);
     	int i = 0;
     	int computerX = 0;
     	int computerY = 0;
@@ -266,5 +263,28 @@ public class SosGame {
 		}
 		
 		if(emptyCoordinates.size() == 0) isGameEnd = true;
+	}
+	
+	private void whoWillPlayFirst() {
+		if(rand.nextInt(10) % 2 == 0) {
+			playFirst = playerFlag;
+			playSecond = computerFlag;
+		}
+		else {
+			playFirst = computerFlag;
+			playSecond = playerFlag;
+		}
+		
+	}
+
+	private void decideCharOfPlayers() {
+		if(rand.nextInt(10) % 2 == 0) {
+			computerChar = 'S';
+			playerChar = 'O';
+		}
+		else {
+			computerChar = 'O';
+			playerChar = 'S';
+		}
 	}
 }
